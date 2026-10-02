@@ -48,6 +48,8 @@
         "test": "php tests/smoke.php",
         "test:acceptance": "php tests/acceptance.php",
         "test:i18n": "php tests/i18n.php",
+        "glossary:lint": "php tools/glossary/lint.php",
+        "glossary:build": "php tools/glossary/build.php",
         "benchmark": "php tests/benchmark.php",
         "demo": "php examples/demo.php"
     },
@@ -55,6 +57,8 @@
         "test": "Runs the dependency-free smoke test suite (no PHPUnit required, works offline).",
         "test:acceptance": "Checks that the markup, the entities and the emojis survive in every language.",
         "test:i18n": "Data integrity and translation quality: correct script per language, no Spanish leftovers, no duplicated punctuation and no node lost between pivot legs.",
+        "glossary:lint": "Checks the hand written article glossary: valid UTF-8, correct script per language, punctuation kept, and no clash with the shipped dictionaries.",
+        "glossary:build": "Merges the article glossary into data/*.json. Add --check for a dry run, or language codes to write only those legs.",
         "benchmark": "Measures time, memory and cache cost against a real page.",
         "demo": "Runs the usage examples."
     },

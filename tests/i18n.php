@@ -395,7 +395,7 @@ $floors = [
     // only what the glossary really covers is counted. The direct legs cover
     // every node of this page; the other languages go through the English hub
     // and are still being filled in.
-    'software-2026' => ['de' => 0.95, 'en' => 0.95, 'fr' => 0.95, 'it' => 0.20, 'pt' => 0.20, 'ja' => 0.01, 'ar' => 0.01, 'ru' => 0.01],
+    'software-2026' => ['de' => 0.95, 'en' => 0.95, 'fr' => 0.95, 'it' => 0.95, 'pt' => 0.20, 'ja' => 0.01, 'ar' => 0.01, 'ru' => 0.01],
 ];
 
 $section('4. Cobertura de la pagina');
