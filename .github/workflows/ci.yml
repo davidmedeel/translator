@@ -65,5 +65,8 @@ jobs:
           coverage: none
           tools: composer:v2
 
+      - name: Install
+        run: composer install --no-interaction --no-progress --no-dev --optimize-autoloader
+
       - name: Measure
         run: php tests/benchmark.php
