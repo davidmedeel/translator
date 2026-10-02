@@ -68,6 +68,28 @@ foreach (glob(__DIR__ . '/part-*.php') as $file) {
     }
 }
 
+// Mirrors live in mirror-*.php and are merged into the same rows, so a mirror
+// can never refer to a node index that part-*.php does not define.
+foreach (glob(__DIR__ . '/mirror-*.php') as $file) {
+    $part = require $file;
+
+    foreach ($part as $index => $row) {
+        if (!isset($glossary[$index])) {
+            fwrite(STDERR, sprintf("mirror %s usa el indice %d, que no existe\n", basename($file), $index));
+            exit(1);
+        }
+
+        foreach ($row as $code => $value) {
+            if (isset($glossary[$index][$code])) {
+                fwrite(STDERR, sprintf("indice %d: %s ya esta definido\n", $index, $code));
+                exit(1);
+            }
+
+            $glossary[$index][$code] = $value;
+        }
+    }
+}
+
 /* ------------------------------------------------------------ 2. ARGUMENTS */
 
 $argv = $_SERVER['argv'];
@@ -103,8 +125,13 @@ foreach ($glossary as $index => $row) {
             continue;
         }
 
-        // Direct leg: Spanish -> target.
-        $plan[$code === 'en' ? 'es_en' : 'es_de'][$spanish] = $value;
+        // Direct leg: Spanish -> target. Only es_en and es_de are direct tables;
+        // every other language is reached through the English hub.
+        if ($code !== 'en' && $code !== 'de') {
+            continue;
+        }
+
+        $plan['es_' . $code][$spanish] = $value;
     }
 }
 
