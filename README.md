@@ -6,19 +6,11 @@
 
 Deterministic. No API keys. No network. No telemetry.
 
-[![PHP](https://img.shields.io/badge/php-%3E%3D7.4-777BB4?style=flat-square&logo=php)](https://www.php.net/)
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
-[![Dependencies](https://img.shields.io/badge/dependencies-0-success?style=flat-square)](composer.json)
-[![Tests](https://img.shields.io/badge/tests-179%20assertions-success?style=flat-square)](tests/smoke.php)
-[![Languages](https://img.shields.io/badge/languages-9-informational?style=flat-square)](#-supported-languages)
-[![Pairs](https://img.shields.io/badge/pairs-72-informational?style=flat-square)](#-combination-matrix)
-[![Offline](https://img.shields.io/badge/network-zero%20requests-success?style=flat-square)](src)
-
 </div>
 
 ---
 
-## 📖 What is this
+## 🔍 What is this
 
 A translation engine for WordPress plugins, SaaS dashboards and static sites that
 **cannot call an external API**. It ships with dictionaries for nine languages
@@ -29,8 +21,8 @@ use Medel\Translator\Translator;
 
 $t = new Translator();
 
-echo $t->translate('Hola mundo', 'en', 'es');            // Hello world
-echo $t->translate('Añadir al carrito', 'de', 'es');     // In den Warenkorb
+echo $t->translate('Hola mundo', 'en', 'es');          // Hello world
+echo $t->translate('Añadir al carrito', 'de', 'es');   // In den Warenkorb
 ```
 
 Real HTML in, real HTML out. Tags, attributes, entities, emojis and links come out
@@ -49,9 +41,31 @@ echo $t->translate(
 <h3>💻 Vollständiger Quellcode</h3><br><p>Vollständiger Quellcode <strong>PHP</strong></p>
 ```
 
+The `&nbsp;` spacer became a `<br>`, and nothing else moved.
+
 ---
 
-## ✨ Why
+## 📖 Read this first
+
+This is a **dictionary engine, not a neural one**. That single sentence explains
+every design decision:
+
+* ✅ A sentence stored in the glossary comes out **perfect**, with correct word
+  order, because the dictionary decides the order.
+* 🔒 A sentence that is **not** in the glossary comes back **untouched** in its
+  original language. It never invents anything.
+
+So the quality of the output is the quality of your glossary, and the failure mode
+is always safe. Add a sentence, get a translation. Forget one, your Spanish stays
+Spanish instead of turning into broken German.
+
+```bash
+composer test:i18n   # tells you exactly how much of each page is covered
+```
+
+---
+
+## ✨ Highlights
 
 | | |
 | --- | --- |
@@ -60,9 +74,9 @@ echo $t->translate(
 | 🧪 **Deterministic** | Same input, same output, always. Ideal for tests and CI |
 | 🌍 **Nine languages, 72 pairs** | English works as the hub, so adding a language unlocks 10 pairs at once |
 | 🗄️ **Local cache** | SQLite with WAL, falling back to JSON and then memory |
-| 🪶 **10 MB** peak memory for the whole engine, dictionaries included |
-| ⚡ **~0.2 ms** per short string | And microseconds when the cache is warm |
-| 📥 **Zero runtime dependencies** | `php`, `ext-json`, `ext-mbstring`. That's it |
+| 🪶 **10 MB** | Peak memory for the whole engine, dictionaries included |
+| ⚡ **~0.2 ms** | Per short string, and microseconds when the cache is warm |
+| 📥 **Zero dependencies** | `php`, `ext-json`, `ext-mbstring`. That's it |
 
 ---
 
@@ -97,7 +111,7 @@ autoload PSR-4.
 
 Regional variants are accepted (`es-MX` → `es`, `pt-BR` → `pt`, `jpn` → `ja`).
 
-### Combination matrix
+### 🧮 Combination matrix
 
 ```
         de   en   es   fr   it   ja   pt   ru
@@ -154,7 +168,7 @@ match**, which is how a segmenter behaves:
 | --- | --- |
 | `<a href="https://medel.es/">Medel Platforms</a>` | Same tag, same `href`, same text |
 | `👨&zwj;💻` | Same emoji sequence, joiner included |
-| `&nbsp;` | Same entity (or `<br>` if you ask for it) |
+| `&nbsp;` | Same entity, or `<br>` if you ask for it |
 | `/docs`, `config.php` | Never translated, they are paths |
 | `<code>`, `<pre>` | Skipped unless `translate_skipped_tags` is on |
 | `PHP 8.2`, `S3` | Version numbers and acronyms untouched |
@@ -190,25 +204,13 @@ $translator->translate($html, 'de', 'es', ['keep' => ['Pexels']]);
 
 > [!IMPORTANT]
 > A brand made of several words **must** be in one of these lists. The `keep`
-> list is consulted token by token, so `Platforms` on its own would be looked up.
-> Multi word entries are masked, which is why `Medel Platforms` comes back
-> untouched in all nine languages.
+> list is consulted token by token, so `Platforms` on its own would be looked up
+> and turned into `Bahnsteige` in German. Multi word entries are masked, which is
+> why `Medel Platforms` comes back untouched in all nine languages.
 
 ---
 
-## 🎯 Quality: why it stays silent instead of guessing
-
-A dictionary engine can only translate what its glossary contains. When it does
-not know something, **it returns the original text** rather than inventing it.
-
-Two guards enforce that:
-
-```php
-$t = new Translator(['min_coverage' => 0.5]);   // weighted coverage floor
-$t = new Translator(['prose_guard' => true]);    // default
-```
-
-### The prose guard
+## 🎯 The prose guard
 
 Word by word translation of a long sentence is **always** wrong word order,
 whatever the coverage says:
@@ -222,18 +224,36 @@ La decisión entre software a medida no es trivial
 
 So a fragment with **8 or more tokens where no phrase ever matched a quarter of
 them is returned untouched**. Showing the original Spanish is always better than
-showing broken German. Disable it with `['prose_guard' => false]`.
+showing broken German.
 
-### Weighted coverage
+```php
+$t = new Translator(['prose_guard' => true]);   // default
+$t->setProseGuard(false);                        // translate anyway
+```
+
+### Coverage control
 
 `de`, `con`, `y` and `la` are trivial to translate and say nothing about quality.
 A sentence can be 85 % translated by token count and still be nonsense, so the
-threshold is applied to a **weighted** score: function words count `0.25`,
-content words count `1`.
+`min_coverage` threshold is applied to a **weighted** score: function words count
+`0.25`, content words count `1`.
 
 ```php
+$t = new Translator(['min_coverage' => 0.5]);
+
 $t->result($fragment, 'de', 'es')->coverage();   // informative token ratio
 $t->result($fragment, 'de', 'es')->matched();    // false = left as it was
+$t->result($fragment, 'de', 'es')->routeAsString();  // 'es>en>de'
+```
+
+### Pivot fallback
+
+On an indirect route the text passes through English. If the last leg falls below
+the threshold, the engine can return what it already achieved instead of
+reverting to the source:
+
+```php
+$t->translate($html, 'fr', 'es', ['pivot_fallback' => 'last-leg']);
 ```
 
 ---
@@ -260,12 +280,12 @@ $t->pruneCache();
 $t->clearCache();
 ```
 
-The directory is discovered automatically: the env var
-`MEDEL_TRANSLATOR_CACHE`, then `var/cache` of the package, then
-`storage/translator-cache` of the project, then the system temp directory. If
-nothing is writable the engine keeps working in memory.
+The directory is discovered automatically: the `MEDEL_TRANSLATOR_CACHE` env var,
+then `var/cache` of the package, then `storage/translator-cache` of the project,
+then the system temp directory. If nothing is writable the engine keeps working
+in memory.
 
-### Measured cost
+### ⚡ Measured cost
 
 Real page, 4.6 KB of HTML with 65 text nodes, PHP 8.2 on Windows (a pessimistic
 environment):
@@ -305,7 +325,7 @@ composer benchmark
 | `setKeepTerms()` / `keep()` / `addKeepTerm()` | Verbatim terms |
 | `keepPhrases()` | Multi word keep terms being masked |
 | `minCoverage()` / `setMinCoverage($c)` | Coverage floor |
-| `pivotFallback()` / `setPivotFallback($mode)` | What to return when a pivot route is weak |
+| `pivotFallback()` / `setPivotFallback($mode)` | Weak pivot route behaviour |
 | `hasProseGuard()` / `setProseGuard($bool)` | The prose guard |
 | `isTranslatable($from, $to)` | Is there a dictionary, direct or pivoted? |
 | `has($text, $from, $to)` | Does the phrase exist? |
@@ -318,7 +338,7 @@ composer benchmark
 | `engine()` / `htmlProcessor()` | Component access |
 | `stats()` | Counters, cache, engine |
 
-### Options
+### ⚙️ Options
 
 | Option | Default | What it does |
 | --- | --- | --- |
@@ -330,7 +350,7 @@ composer benchmark
 | `prose_guard` | `true` | Reject long fragments no phrase ever covered |
 | `html` | `true` | HTML pipeline when markup is detected |
 | `empty_paragraphs` | `'keep'` | `'br'`, `'remove'` or `'keep'` for `<p>&nbsp;</p>` |
-| `skip_tags` | see below | Tags whose content is never translated |
+| `skip_tags` | `code`, `pre`, `kbd`, `samp`, `var`, `script`, `style` | Tags never translated |
 | `translate_skipped_tags` | `false` | Translate `<code>` and `<pre>` too |
 | `detect_source` | `true` | Allow calling without `from` |
 | `exact_only` | `false` | Only exact phrase hits, no token guessing |
@@ -380,7 +400,7 @@ A table is a JSON file per language pair:
 | Key | Meaning |
 | --- | --- |
 | `phrases` | Matched first, longest wins, up to 32 words in a row |
-| `words` | Token level lookup with light singular/plural tolerance |
+| `words` | Token lookup with light singular/plural tolerance |
 | `keep` | Copied verbatim; multi word entries are masked |
 | `rules` | Declarative post processing of the target text |
 | `drop_source` | Source words removed when the language is used as a pivot |
@@ -410,6 +430,8 @@ Rules that avoid the bugs this package already had:
 7. For pivot languages, write the phrase **in English** in `en_XX.json`, because
    that is what the first leg produces.
 
+See [`data/README.md`](data/README.md) for the full format.
+
 ### 🔧 Maintenance
 
 ```bash
@@ -417,10 +439,6 @@ php tools/refresh.php                       # regenerate the inverse tables
 php tools/invert.php data/en_de.json data/de_en.json
 composer test:i18n                          # data integrity + quality gates
 ```
-
-`refresh.php` regenerates every reverse table, restores the hand written
-additions, removes keys that only differ in case and drops single word phrases
-that shadow the words table.
 
 ---
 
@@ -505,7 +523,6 @@ Only outside `<code>` and `<pre>`.
   produces nonsense.
 * HTML is processed with byte offsets, not a DOM parser. Malformed markup
   (unclosed tags) is left alone on purpose.
-* Tested on PHP 8.2 and Windows. CI runs the 7.4 → 8.4 matrix.
 * Concurrent writers to the same SQLite cache rely on WAL plus a 3 s busy
   timeout. Multiple workers are fine; a network filesystem is not.
 
@@ -530,8 +547,8 @@ php tools/invert.php data/en_nl.json data/nl_en.json
 That unlocks 10 pairs at once, because every other language reaches it through
 the English hub.
 
-Please run `composer test`, `composer test:acceptance` and `composer test:i18n`
-before opening a pull request.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the dictionary guidelines, and please
+run the three test commands before opening a pull request.
 
 ---
 
