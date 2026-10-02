@@ -1,0 +1,28 @@
+# Dependencies (the package has none at runtime, but keep composer noise out)
+/vendor/
+composer.lock
+
+# Local cache created at runtime
+/var/
+/storage/
+
+# Dictionaries added by the user (only the shipped ones are versioned)
+/data/*.local.json
+/data/_*
+
+# Editors and OS noise
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+*.orig
+.cache/
+.phpunit.result.cache

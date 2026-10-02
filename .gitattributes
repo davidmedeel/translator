@@ -1,0 +1,15 @@
+# Normalize line endings in the repository, keep LF in the working tree on
+# Windows so the same files work on Linux CI without churn.
+* text=auto eol=lf
+
+*.php   text eol=lf diff=php
+*.json  text eol=lf
+*.md    text eol=lf
+*.html  text eol=lf diff=html
+
+# Binary
+*.sqlite  binary
+*.sqlite3 binary
+*.png    binary
+*.jpg    binary
+*.gif    binary

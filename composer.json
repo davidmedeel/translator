@@ -1,0 +1,67 @@
+{
+    "name": "medel/translator",
+    "description": "Offline, dependency-free translation engine for plain text and HTML fragments. Dictionary + heuristic resolution, pivot languages, protected-term placeholders and a local SQLite/JSON cache. Zero HTTP requests, zero external APIs.",
+    "type": "library",
+    "keywords": [
+        "translator",
+        "translation",
+        "offline",
+        "no-api",
+        "i18n",
+        "l10n",
+        "html",
+        "dictionary",
+        "localization"
+    ],
+    "homepage": "https://github.com/medel/translator",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Medel",
+            "homepage": "https://github.com/medel"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/medel/translator/issues",
+        "source": "https://github.com/medel/translator"
+    },
+    "require": {
+        "php": ">=7.4",
+        "ext-json": "*",
+        "ext-mbstring": "*"
+    },
+    "suggest": {
+        "ext-pdo_sqlite": "Enables the fast SQLite cache backend (the cache falls back to JSON automatically when missing).",
+        "ext-iconv": "Only used as a fallback for multibyte case folding on exotic platforms."
+    },
+    "autoload": {
+        "psr-4": {
+            "Medel\\Translator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Medel\\Translator\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "php tests/smoke.php",
+        "test:acceptance": "php tests/acceptance.php",
+        "test:i18n": "php tests/i18n.php",
+        "benchmark": "php tests/benchmark.php",
+        "demo": "php examples/demo.php"
+    },
+    "scripts-descriptions": {
+        "test": "Runs the dependency-free smoke test suite (no PHPUnit required, works offline).",
+        "test:acceptance": "Checks that the markup, the entities and the emojis survive in every language.",
+        "test:i18n": "Data integrity and translation quality: correct script per language, no Spanish leftovers, no duplicated punctuation and no node lost between pivot legs.",
+        "benchmark": "Measures time, memory and cache cost against a real page.",
+        "demo": "Runs the usage examples."
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
