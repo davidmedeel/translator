@@ -65,7 +65,8 @@
         "Everything is included": "すべてが含まれます",
         "There are no mandatory paid modules, premium plugins or feature unlocks needed after buying Tokify": "Tokifyを購入した後に必須の有料モジュール、プレミアムプラグイン、機能のロック解除は必要ありません",
         "Stripe, PayPal, AI voices, avatars, subtitles, social media publishing, teams, referrals, REST API, multilingual system, admin panel and all other features are included in the package": "Stripe、PayPal、AI音声、アバター、字幕、ソーシャルメディア公開、チーム、紹介制度、REST API、多言語システム、管理パネル、およびその他すべての機能がパッケージに含まれます",
-        "Local storage, Amazon S3 and compatible with S3": "ローカルストレージ、Amazon S3、S3互換ストレージ"
+        "Local storage, Amazon S3 and compatible with S3": "ローカルストレージ、Amazon S3、S3互換ストレージ",
+        "Local storage, Amazon S3 and compatible S3": "ローカルストレージ、Amazon S3、および S3 互換ストレージ"
     },
     "words": {
         "Hello world": "こんにちは世界",

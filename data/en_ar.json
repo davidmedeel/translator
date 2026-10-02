@@ -65,7 +65,8 @@
         "Everything is included": "كل شيء متضمن",
         "There are no mandatory paid modules, premium plugins or feature unlocks needed after buying Tokify": "لا توجد وحدات مدفوعة إلزامية أو إضافات مميزة أو فتح للميزات مطلوبة بعد شراء Tokify",
         "Stripe, PayPal, AI voices, avatars, subtitles, social media publishing, teams, referrals, REST API, multilingual system, admin panel and all other features are included in the package": "تشمل الحزمة Stripe وPayPal وأصوات الذكاء الاصطناعي والصور الرمزية والترجمة والنشر على وسائل التواصل والفرق والإحالات وREST API والنظام متعدد اللغات ولوحة التحكم وكل الميزات الأخرى",
-        "Local storage, Amazon S3 and compatible with S3": "تخزين محلي وAmazon S3 ومتوافق مع S3"
+        "Local storage, Amazon S3 and compatible with S3": "تخزين محلي وAmazon S3 ومتوافق مع S3",
+        "Local storage, Amazon S3 and compatible S3": "تخزين محلي، Amazon S3 ومتوافق مع S3"
     },
     "words": {
         "Hello world": "مرحبا بالعالم",

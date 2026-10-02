@@ -50,6 +50,18 @@ final class DictionaryTable
     /** @var array<string,string> */
     private $phrases = [];
 
+    /**
+     * The written key of every phrase, indexed like $phrases.
+     *
+     * normalizeKey() folds punctuation and accents away, so the folded key
+     * cannot tell "Amazon S3 and S3 compatible" (a phrase that holds a
+     * protected term and must be replaced whole) from a sentence that merely
+     * mentions the brand.
+     *
+     * @var array<string,string>
+     */
+    private $phraseSources = [];
+
     /** @var array<string,string> */
     private $words = [];
 
@@ -149,6 +161,9 @@ final class DictionaryTable
                 if ($section === 'phrases') {
                     $this->phrases[$folded] = $value;
                     $this->phrasesStrict[$strict] = $value;
+                    // The written key, so a phrase holding a protected term can
+                    // be told apart from a sentence that merely mentions it.
+                    $this->phraseSources[$folded] = (string) $rawKey;
                 } else {
                     $this->words[$folded] = $value;
                     $this->wordsStrict[$strict] = $value;
@@ -530,6 +545,24 @@ final class DictionaryTable
     public function translate(string $text): array
     {
         if ($this->keepPhrases !== []) {
+            // A dictionary phrase may legitimately contain a keep term: the value
+            // is written by hand and brings the brand with it ("Local storage,
+            // Amazon S3 and S3 compatible"). Masking first would turn the span
+            // into a placeholder, no phrase could match it any more, and the
+            // entry would be indexed but never resolved.
+            //
+            // The masking, on the other hand, breaks exactly the case that needs the fast
+            // path, so the fragment is looked up whole first. Only a phrase that
+            // actually holds a protected term qualifies: a sentence that merely
+            // mentions the brand between other words keeps going through the
+            // masking, so the brand is never translated while the rest of the
+            // sentence still is.
+            $key = Text::normalizeKey($text);
+
+            if ($key !== '' && isset($this->phrases[$key]) && $this->phraseHoldsProtected($key)) {
+                return $this->resolve($text);
+            }
+
             [$masked, $phrases] = $this->maskKeepPhrases($text);
             $outcome = $this->resolve($masked);
             $outcome['text'] = $this->unmaskKeepPhrases($outcome['text'], $phrases);
@@ -538,6 +571,38 @@ final class DictionaryTable
         }
 
         return $this->resolve($text);
+    }
+
+    /**
+     * True when the phrase holds a protected term and its value keeps that term
+     * exactly, which is the only case where replacing the whole span is safe.
+     */
+    private function phraseHoldsProtected(string $key): bool
+    {
+        $source = (string) ($this->phraseSources[$key] ?? $key);
+        $value = (string) ($this->phrases[$key] ?? '');
+        $count = static function (string $text, string $term): int {
+            $found = preg_match_all('/(?<![\p{L}\p{N}])' . preg_quote($term, '/') . '(?![\p{L}\p{N}])/iu', $text);
+
+            return $found === false ? 0 : $found;
+        };
+        $holds = false;
+
+        foreach (array_keys($this->keepPhrases) as $term) {
+            $inSource = $count($source, $term);
+
+            if ($inSource === 0) {
+                continue;
+            }
+
+            if ($count($value, $term) !== $inSource) {
+                return false;
+            }
+
+            $holds = true;
+        }
+
+        return $holds;
     }
 
     /**

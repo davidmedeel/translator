@@ -586,6 +586,35 @@ $protected = $translator->translate($spanPhrase, 'de', 'es', ['protected_terms' 
 $t->is('protected term is still there', true, strpos($protected, 'saas') !== false);
 $t->is('no phrase replaces a protected term', false, strpos($protected, 'SaaS-Unternehmen') !== false);
 
+// A phrase whose own text holds a multi word keep term is a different case: the
+// value is written by hand and brings the brand with it, so replacing the whole
+// span is correct. Masking first would turn it into a placeholder and the entry
+// would be indexed but never resolved.
+$brandPhrase = DictionaryTable::fromArray([
+    'phrases' => [
+        'Complete Amazon S3 backup for every project' => 'Vollständiges Amazon S3-Backup für jedes Projekt',
+        'Amazon S3 backup' => 'Amazon S3-Backup',
+    ],
+    'keep' => ['amazon s3'],
+], 'en', 'de');
+
+$outcome = $brandPhrase->translate('Complete Amazon S3 backup for every project');
+$t->is('a phrase holding a keep term resolves', 'Vollständiges Amazon S3-Backup für jedes Projekt', $outcome['text']);
+$t->is('and it is reported as matched', true, $outcome['matched']);
+$t->is('with full coverage', true, $outcome['coverage'] > 0.99);
+
+// A phrase that would translate the brand must still be refused.
+$risky = DictionaryTable::fromArray([
+    'phrases' => ['Complete Medel Platforms setup' => 'Complete Medel Bahnsteige setup'],
+    'keep' => ['medel platforms'],
+], 'en', 'de');
+
+$t->is(
+    'a phrase that would translate the brand is refused',
+    'Complete Medel Platforms setup',
+    $risky->translate('Complete Medel Platforms setup')['text']
+);
+
 $keeper = new Translator(['data_path' => $root . '/data', 'cache' => false, 'keep' => ['SaaS']]);
 $t->is('keep can be set on the constructor', ['SaaS'], $keeper->keepTerms());
 $t->is('addKeepTerm returns the instance', $keeper, $keeper->addKeepTerm('Pexels'));
