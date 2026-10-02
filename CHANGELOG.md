@@ -76,5 +76,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No telemetry, no analytics, no external requests of any kind. A test greps
   `src/` for `curl`, `fsockopen`, `stream_context_create` and friends.
 
-[Unreleased]: https://github.com/medel/translator/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/medel/translator/releases/tag/v1.0.0
+[Unreleased]: https://github.com/davidmedeel/translator/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/davidmedeel/translator/releases/tag/v1.0.0

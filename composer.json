@@ -13,7 +13,7 @@
         "dictionary",
         "localization"
     ],
-    "homepage": "https://github.com/medel/translator",
+    "homepage": "https://github.com/davidmedeel/translator",
     "license": "MIT",
     "authors": [
         {
@@ -22,8 +22,8 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/medel/translator/issues",
-        "source": "https://github.com/medel/translator"
+        "issues": "https://github.com/davidmedeel/translator/issues",
+        "source": "https://github.com/davidmedeel/translator"
     },
     "require": {
         "php": ">=7.4",

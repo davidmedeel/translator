@@ -531,7 +531,7 @@ Only outside `<code>` and `<pre>`.
 ## 🤝 Contributing
 
 ```bash
-git clone https://github.com/medel/translator.git
+git clone https://github.com/davidmedeel/translator.git
 cd translator
 composer install
 composer test
