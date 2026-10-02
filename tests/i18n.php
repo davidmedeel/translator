@@ -339,7 +339,7 @@ foreach (['ja', 'ar', 'ru'] as $code) {
 $nodes = [];
 
 $translator->htmlProcessor()->translateNodes($page, static function (string $node) use (&$nodes): string {
-    $text = trim($node, " \t\n\r\0\x0B\u{00A0}");
+    $text = Text::trim($node);
 
     if ($text !== '' && !Text::isPathLike($text)) {
         $nodes[] = $text;

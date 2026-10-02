@@ -156,12 +156,34 @@ final class Text
         return $length === null ? substr($value, $start) : substr($value, $start, $length);
     }
 
-    /**
+/**
      * Multibyte safe strlen().
      */
     public static function length(string $value): int
     {
         return function_exists('mb_strlen') ? (int) mb_strlen($value, 'UTF-8') : strlen($value);
+    }
+
+    /**
+     * Removes leading and trailing whitespace, non breaking spaces included.
+     *
+     * Native trim() works on bytes, so a charlist holding a multibyte character
+     * ("\u{00A0}" compiles to C2 A0) also lists its individual bytes: trimming
+     * "¿Por qué?" would delete the C2 lead byte and leave a broken BF. That
+     * silent corruption is why this helper exists; callers that need to strip
+     * HTML nodes should use it instead of a hand written charlist.
+     */
+    public static function trim(string $value, string $extra = ''): string
+    {
+        $class = '\p{Z}\s\x{FEFF}';
+
+        if ($extra !== '') {
+            $class .= preg_quote($extra, '/');
+        }
+
+        $out = preg_replace('/^[' . $class . ']+|[' . $class . ']+$/u', '', $value);
+
+        return $out === null ? $value : $out;
     }
 
 /**

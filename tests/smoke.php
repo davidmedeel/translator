@@ -170,6 +170,33 @@ $t->is(
     $translator->translate('ma&shy;nana', 'en', 'es')
 );
 
+// Native trim() works on bytes, so a charlist holding NBSP ("\u{00A0}" is C2 A0)
+// also lists the bytes C2 and A0 on their own and silently eats the lead byte of
+// "¿". Text::trim() is the safe replacement used when reading HTML nodes.
+$t->is('trim keeps the lead byte of an inverted question mark', "\u{00BF}x", Text::trim("\u{00BF}x"));
+$t->is('trim keeps a leading accented word', "\u{00E9}t\u{00E9}", Text::trim("\u{00E9}t\u{00E9} "));
+$t->is('trim still strips non breaking spaces', 'Hola', Text::trim("\u{00A0} Hola \u{00A0}"));
+$t->is('trim still strips newlines', 'Hola', Text::trim("\r\n Hola \t"));
+$t->is('trim accepts extra characters', 'Hola', Text::trim('--Hola--', '-'));
+$t->is(
+    'a node starting with an inverted question mark is not truncated',
+    "\u{00BF}Por qu\u{00E9}",
+    (static function () use ($translator): string {
+        $seen = '';
+
+        $translator->htmlProcessor()->translateNodes(
+            '<h2>&iquest;Por qu&eacute;</h2>',
+            static function (string $node) use (&$seen): string {
+                $seen = Text::trim($node);
+
+                return $node;
+            }
+        );
+
+        return $seen;
+    })()
+);
+
 $t->is(
     'em dash entity stays a separator and is restored',
     'Hello world &mdash; Connection secure',
@@ -672,7 +699,7 @@ foreach (['de', 'en', 'fr', 'it', 'pt'] as $language) {
     $pageTranslator->htmlProcessor()->translateNodes(
         $page,
         static function (string $node) use ($language, $pageTranslator, &$untranslated): string {
-            $text = trim($node, " \t\n\r\0\x0B\u{00A0}");
+            $text = Text::trim($node);
 
             // Blank spacers and paths like "/docs" are not vocabulary, so
             // coming back untranslated is the right answer for them.
